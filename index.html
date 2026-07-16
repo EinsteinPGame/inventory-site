@@ -64,6 +64,18 @@
 <div class="container">
   <div class="search-bar">
     <input type="text" id="search" placeholder="Search item name, category, logistic ID..." autofocus>
+    <select id="sort-select" style="padding:10px 12px;background:#12122a;border:1px solid #2a2a4a;border-radius:10px;color:#e0e0e0;font-size:0.85rem;font-family:inherit;outline:none;cursor:pointer;min-width:140px">
+      <option value="n:1">Name A→Z</option>
+      <option value="n:-1">Name Z→A</option>
+      <option value="p:1">Price Low→High</option>
+      <option value="p:-1">Price High→Low</option>
+      <option value="t:1">Total Low→High</option>
+      <option value="t:-1">Total High→Low</option>
+      <option value="q:1">Qty Low→High</option>
+      <option value="q:-1">Qty High→Low</option>
+      <option value="d:-1">Date Newest</option>
+      <option value="d:1">Date Oldest</option>
+    </select>
   </div>
   <div class="filters" id="filters"></div>
   <div class="stats" id="stats"></div>
@@ -261,6 +273,12 @@ function highlightMatch(text,query){
 document.getElementById('search').addEventListener('input',function(){
   clearTimeout(searchTimeout);
   searchTimeout=setTimeout(()=>{page=0;applyFilters()},150);
+});
+
+document.getElementById('sort-select').addEventListener('change',function(){
+  const [col,dir]=this.value.split(':');
+  sortCol=col;sortDir=parseInt(dir);
+  page=0;applyFilters();
 });
 
 document.addEventListener('keydown',function(e){
