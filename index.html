@@ -73,11 +73,14 @@
       <option value="t:-1">Total High→Low</option>
       <option value="q:1">Qty Low→High</option>
       <option value="q:-1">Qty High→Low</option>
+      <option value="u:1">Unit A→Z</option>
+      <option value="u:-1">Unit Z→A</option>
       <option value="d:-1">Date Newest</option>
       <option value="d:1">Date Oldest</option>
     </select>
   </div>
   <div class="filters" id="filters"></div>
+  <div class="filters" id="unit-filters"></div>
   <div class="stats" id="stats"></div>
   <div id="table-wrap">
     <table>
@@ -98,6 +101,7 @@ let sortDir=1;
 let page=0;
 const PAGE_SIZE=50;
 let activeSheet='ALL';
+let activeUnit='ALL';
 let searchTimeout=null;
 
 const COLS=[
@@ -152,11 +156,38 @@ function buildFilters(){
     btn.textContent=labels[s]||s;
     btn.onclick=()=>{
       activeSheet=s;
-      document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+      f.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
       page=0;applyFilters();
     };
     f.appendChild(btn);
+  });
+  buildUnitFilters();
+}
+
+function buildUnitFilters(){
+  const uf=document.getElementById('unit-filters');
+  const unitLabels=['ALL','Box','Sealed','SLAB','ETB','pack','loose pack','booster bundle','UPC','Figure collection','Illustration Collection','sleeved pack'];
+  const unitCounts={};
+  DATA.forEach(x=>{
+    const u=(x.u||'').trim();
+    if(u&&!(/^\d+(\.\d+)?$/.test(u))){
+      const key=unitLabels.find(l=>l.toLowerCase()===u.toLowerCase())||u;
+      unitCounts[key]=(unitCounts[key]||0)+1;
+    }
+  });
+  const available=unitLabels.filter(l=>l==='ALL'||unitCounts[l]);
+  available.forEach(u=>{
+    const btn=document.createElement('button');
+    btn.className='filter-btn'+(u===activeUnit?' active':'');
+    btn.textContent=u==='ALL'?'All Units':u+(unitCounts[u]?' ('+unitCounts[u]+')':'');
+    btn.onclick=()=>{
+      activeUnit=u;
+      uf.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      page=0;applyFilters();
+    };
+    uf.appendChild(btn);
   });
 }
 
@@ -164,6 +195,10 @@ function applyFilters(){
   const q=(document.getElementById('search').value||'').toLowerCase().trim();
   filtered=DATA.filter(item=>{
     if(activeSheet!=='ALL'&&item.s!==activeSheet)return false;
+    if(activeUnit!=='ALL'){
+      const u=(item.u||'').trim();
+      if(u.toLowerCase()!==activeUnit.toLowerCase())return false;
+    }
     if(!q)return true;
     const terms=q.split(/\s+/);
     return terms.every(term=>
