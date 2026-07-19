@@ -189,13 +189,11 @@ function applyFilters(){
 function updateStats(){
   const s=document.getElementById('stats');
   const totalQty=filtered.reduce((a,x)=>a+(x.q||0),0);
-  const totalCost=filtered.reduce((a,x)=>a+(x.t||0),0);
   const uniqueNames=new Set(filtered.map(x=>x.n)).size;
   s.innerHTML=`
     <div class="stat"><div class="stat-val">${filtered.length}</div><div class="stat-label">Records</div></div>
     <div class="stat"><div class="stat-val">${uniqueNames}</div><div class="stat-label">Unique Items</div></div>
     <div class="stat"><div class="stat-val">${totalQty.toLocaleString()}</div><div class="stat-label">Total Qty</div></div>
-    <div class="stat"><div class="stat-val">${totalCost?'$'+totalCost.toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:0}):'-'}</div><div class="stat-label">Total Cost (SGD)</div></div>
   `;
 }
 
